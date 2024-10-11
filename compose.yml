@@ -1,0 +1,109 @@
+---
+services:
+
+  apache2:
+    container_name: ${COMPOSE_PROJECT_NAME}.apache2
+    image: ghcr.io/manarth/vm-apache2:main
+    volumes:
+      - type: volume
+        source: source-code
+        target: /var/www/html
+      - type: volume
+        source: shared-files
+        target: /var/www/shared-files
+      # Configuration bindings.
+      - type: bind
+        source: .container-config/apache2/etc/apache2/apache2.conf
+        target: /etc/apache2/apache2.conf
+      - type: bind
+        source: .container-config/apache2/etc/apache2/sites-available/000-default.conf
+        target: /etc/apache2/sites-available/000-default.conf
+      - type: bind
+        source: .container-config/apache2/etc/apache2/mods-enabled/expires.load
+        target: /etc/apache2/mods-enabled/expires.load
+      - type: bind
+        source: .container-config/apache2/etc/apache2/mods-enabled/proxy.load
+        target: /etc/apache2/mods-enabled/proxy.load
+      - type: bind
+        source: .container-config/apache2/etc/apache2/mods-enabled/proxy_fcgi.load
+        target: /etc/apache2/mods-enabled/proxy_fcgi.load
+      - type: bind
+        source: .container-config/apache2/etc/apache2/mods-enabled/rewrite.load
+        target: /etc/apache2/mods-enabled/rewrite.load
+    depends_on:
+      - phpfpm
+    ports:
+      - 80:80
+      - 443:443
+
+  clamav:
+    container_name: ${COMPOSE_PROJECT_NAME}.clamav
+    image: ghcr.io/manarth/vm-clamav:main
+    volumes:
+      - type: volume
+        source: clamav-signatures
+        target: /var/lib/clamav
+
+  development:
+    container_name: ${COMPOSE_PROJECT_NAME}.development
+    environment:
+      MYSQL_HOST: mariadb
+    image: ghcr.io/manarth/vm-development:main
+    volumes:
+      - type: volume
+        source: source-code
+        target: /var/www/html
+      - type: volume
+        source: shared-files
+        target: /var/www/shared-files
+      - type: volume
+        source: shell-home
+        target: /home/developer
+      - type: volume
+        source: cache
+        target: /usr/local/cache
+
+  mariadb:
+    container_name: ${COMPOSE_PROJECT_NAME}.mariadb
+    image: ghcr.io/manarth/vm-mariadb:main
+    volumes:
+      - type: volume
+        source: database-data
+        target: /var/lib/mysql
+
+  memcached:
+    container_name: ${COMPOSE_PROJECT_NAME}.memcached
+    image: ghcr.io/manarth/vm-memcached:main
+
+  phpfpm:
+    container_name: ${COMPOSE_PROJECT_NAME}.phpfpm
+    image: ghcr.io/manarth/vm-phpfpm:main
+    volumes:
+      - type: volume
+        source: source-code
+        target: /var/www/html
+      - type: volume
+        source: shared-files
+        target: /var/www/shared-files
+      # Configuration bindings.
+      - type: bind
+        source: .container-config/phpfpm/etc/php/8.3/fpm/conf.d/xdebug.ini
+        target: /etc/php/8.3/fpm/conf.d/xdebug.ini
+      - type: bind
+        source: .container-config/phpfpm/etc/php/8.3/fpm/php.ini
+        target: /etc/php/8.3/fpm/php.ini
+      - type: bind
+        source: .container-config/phpfpm/etc/php/8.3/fpm/pool.d/www.conf
+        target: /etc/php/8.3/fpm/pool.d/www.conf
+
+    depends_on:
+      - mariadb
+      - memcached
+
+volumes:
+  cache:
+  clamav-signatures:
+  database-data:
+  shared-files:
+  shell-home:
+  source-code:
