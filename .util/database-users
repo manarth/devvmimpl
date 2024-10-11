@@ -1,8 +1,8 @@
 #!/bin/sh
 
-docker compose exec mariadb mysql -e "CREATE USER IF NOT EXISTS 'developer'@'*' identified by ''"
-docker compose exec mariadb mysql -e "CREATE USER IF NOT EXISTS 'drupal'@'*' identified by 'drupal'"
+docker compose exec mariadb mysql -e "CREATE USER IF NOT EXISTS 'developer'@'%' identified by ''"
+docker compose exec mariadb mysql -e "CREATE USER IF NOT EXISTS 'drupal'@'%' identified by 'drupal'"
 docker compose exec mariadb mysql -e "CREATE DATABASE IF NOT EXISTS drupal"
-docker compose exec mariadb mysql -e "GRANT ALL ON *.* TO 'developer'@'*' WITH GRANT OPTION"
-docker compose exec mariadb mysql -e "GRANT ALL ON drupal.* TO 'drupal'@'*'"
+docker compose exec mariadb mysql -e "GRANT ALL ON *.* TO 'developer'@'%' WITH GRANT OPTION"
+docker compose exec mariadb mysql -e "GRANT ALL ON drupal.* TO 'drupal'@'%'"
 docker compose exec mariadb mysql -e "FLUSH PRIVILEGES"
